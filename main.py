@@ -10,8 +10,16 @@ def root():
 	return HTMLResponse("<h1>Hello World</h1>")
 
 @app.get("/movies", tags=["Movies"])
-def get_movies():
-	return db.data
+def get_movies(category: str = None):
+	current_movies = db.data.get("data")
+
+	if category:
+		updated_movies = list(
+			filter(lambda item: category in item["category"], current_movies)
+		)
+		current_movies = updated_movies
+
+	return current_movies
 
 @app.get("/movie/{movie_id}", tags=["Movies"])
 def get_movie_detail(movie_id: int):
