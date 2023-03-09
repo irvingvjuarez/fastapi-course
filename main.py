@@ -78,3 +78,20 @@ async def modify_movie(movie_id, request: Request):
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 	return new_movie
+
+@app.delete("/movie/{movie_id}")
+def delete_movie(movie_id):
+	try:
+		_, movie_index = get_movie(id=movie_id)
+	except:
+		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+	movies = get_data()
+	deleted_movie = movies.pop(movie_index)
+
+	try:
+		modify_movies(movies)
+	except:
+		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+	return deleted_movie
