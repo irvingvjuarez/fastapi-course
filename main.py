@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
+from utils.get_movie import get_movie
 import db
 
 app = FastAPI()
@@ -56,3 +57,17 @@ async def add_movie(request: Request):
 			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
 			detail=f"There was an error adding the movie, try again later"
 		)
+
+@app.put("/movie/{movie_id}")
+async def modify_movie(movie_id, request: Request):
+	new_properties = await request.json()
+
+	try:
+		new_movie, movie_index = get_movie(id=movie_id)
+	except:
+		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+	new_movie.update(new_properties)
+	db.data.get("data")[movie_index] = new_movie
+
+	return new_movie
