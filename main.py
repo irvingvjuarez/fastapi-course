@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from utils.get_movie import get_movie
-import db
+from utils.get_data import get_data
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
@@ -12,7 +12,7 @@ def root():
 
 @app.get("/movies", tags=["Movies"])
 def get_movies(category: str = None):
-	current_movies = db.data.get("data")
+	current_movies = get_data()
 
 	if category:
 		updated_movies = list(
@@ -25,7 +25,7 @@ def get_movies(category: str = None):
 @app.get("/movie/{movie_id}", tags=["Movies"])
 def get_movie_detail(movie_id: int):
 	matching_movies = list(
-		filter(lambda movie: movie["id"] == movie_id, db.data.get("data"))
+		filter(lambda movie: movie["id"] == movie_id, get_data())
 	)
 
 	matches = len(matching_movies)
@@ -47,7 +47,7 @@ async def add_movie(request: Request):
 	movie = await request.json()
 
 	try:
-		current_movies = db.data.get("data")
+		current_movies = get_data()
 		movie["id"] = len(current_movies) + 1
 		current_movies.append(movie)
 
