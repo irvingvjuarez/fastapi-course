@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from utils import get_movie, get_data, modify_movies
 from models.movie import Movie
+import random
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
@@ -43,11 +44,10 @@ def get_movie_detail(movie_id: int):
 		)
 
 @app.post("/movie", tags=["Movie"], status_code=status.HTTP_201_CREATED)
-async def add_movie(request: Request):
-	movie: Movie = await request.json()
+async def add_movie(movie: Movie):
 	current_movies = get_data()
 
-	movie.update({"id": len(current_movies) + 1})
+	movie.update({"id": random.randInt()})
 	current_movies.append(movie)
 
 	try:
