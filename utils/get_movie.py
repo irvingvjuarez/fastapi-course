@@ -1,8 +1,5 @@
-import sys
-sys.path.append("../db")
-
-import db
-data = db.data.get("data")
+from .get_data import get_data
+data = get_data()
 
 def get_movie(**kwargs):
 	movies = []

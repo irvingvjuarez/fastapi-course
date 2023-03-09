@@ -2,6 +2,7 @@ from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from utils.get_movie import get_movie
 from utils.get_data import get_data
+from utils.modify_movies import modify_movies
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
@@ -68,6 +69,12 @@ async def modify_movie(movie_id, request: Request):
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 	new_movie.update(new_properties)
-	db.data.get("data")[movie_index] = new_movie
+
+	try:
+		new_data = get_data()
+		new_data[movie_index] = new_movie
+		modify_movies(new_data)
+	except:
+		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 	return new_movie
