@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
 from utils import get_movie, get_data, modify_movies
 from models.movie import Movie
-import random
+from random import randint
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
@@ -47,19 +47,22 @@ def get_movie_detail(movie_id: int):
 async def add_movie(movie: Movie):
 	current_movies = get_data()
 
-	movie.update({"id": random.randInt()})
-	current_movies.append(movie)
+	id = randint(1, 10000)
+	assert type(id) == int, f"{id} must be an integer"
+
+	new_movie = dict(movie)
+	new_movie["id"] = id
+
+	current_movies.append(new_movie)
 
 	try:
 		modify_movies(current_movies)
-		return movie
+		return new_movie
 	except:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @app.put("/movie/{movie_id}", tags=["Movie"])
-async def modify_movie(movie_id, request: Request):
-	new_properties = await request.json()
-
+async def modify_movie(movie_id, new_properties: Movie):
 	try:
 		new_movie, movie_index = get_movie(id=movie_id)
 	except:
