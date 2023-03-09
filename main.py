@@ -1,8 +1,6 @@
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse
-from utils.get_movie import get_movie
-from utils.get_data import get_data
-from utils.modify_movies import modify_movies
+from utils import get_movie, get_data, modify_movies
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
@@ -46,20 +44,18 @@ def get_movie_detail(movie_id: int):
 @app.post("/movie", tags=["Movies"], status_code=status.HTTP_201_CREATED)
 async def add_movie(request: Request):
 	movie = await request.json()
+	current_movies = get_data()
+
+	movie.update({"id": len(current_movies) + 1})
+	current_movies.append(movie)
 
 	try:
-		current_movies = get_data()
-		movie["id"] = len(current_movies) + 1
-		current_movies.append(movie)
-
+		modify_movies(current_movies)
 		return movie
 	except:
-		raise HTTPException(
-			status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-			detail=f"There was an error adding the movie, try again later"
-		)
+		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@app.put("/movie/{movie_id}")
+@app.put("/movie/{movie_id}", tags=["Movie"])
 async def modify_movie(movie_id, request: Request):
 	new_properties = await request.json()
 
@@ -79,7 +75,7 @@ async def modify_movie(movie_id, request: Request):
 
 	return new_movie
 
-@app.delete("/movie/{movie_id}")
+@app.delete("/movie/{movie_id}", tags=["Movie"])
 def delete_movie(movie_id):
 	try:
 		_, movie_index = get_movie(id=movie_id)
