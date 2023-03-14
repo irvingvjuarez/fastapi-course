@@ -18,7 +18,7 @@ def root():
 	return HTMLResponse("<h1>Hello World</h1>")
 
 # MOVIES
-@app.get("/movies", tags=["Movie"], status_code=status.HTTP_200_OK, response_model=List[Movie], dependencies=[Depends(JWTBearer())])
+@app.get("/movies", tags=["Movie"], status_code=status.HTTP_200_OK, response_model=List[Movie])
 def get_movies(category: str = None) -> List[Movie]:
 	current_movies = get_data()
 
@@ -50,7 +50,7 @@ def get_movie_detail(movie_id: int) -> Movie:
 			detail=f"Movie with id {movie_id} not found."
 		)
 
-@app.post("/movie", tags=["Movie"], status_code=status.HTTP_201_CREATED, response_model=Movie)
+@app.post("/movie", tags=["Movie"], status_code=status.HTTP_201_CREATED, response_model=Movie, dependencies=[Depends(JWTBearer())])
 async def add_movie(movie: Movie) -> Movie:
 	current_movies = get_data()
 
@@ -68,7 +68,7 @@ async def add_movie(movie: Movie) -> Movie:
 	except:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@app.put("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_200_OK)
+@app.put("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 async def modify_movie(movie_id, new_properties: Movie) -> Movie:
 	try:
 		new_movie, movie_index = get_movie(id=movie_id)
@@ -88,7 +88,7 @@ async def modify_movie(movie_id, new_properties: Movie) -> Movie:
 
 	return JSONResponse(content=new_movie)
 
-@app.delete("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_200_OK)
+@app.delete("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_200_OK, dependencies=[Depends(JWTBearer())])
 def delete_movie(movie_id) -> Movie:
 	try:
 		_, movie_index = get_movie(id=movie_id)
