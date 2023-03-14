@@ -1,17 +1,23 @@
 from fastapi import FastAPI, HTTPException, status, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from utils import get_movie, get_data, modify_movies
+
 from models.movie import Movie
+from models.user import User
+
+from jwt_manager import create_token
 from typing import List
 from random import randint
 
 app = FastAPI()
 app.title = "My very first FastAPI application"
 
+# HOME
 @app.get("/", tags=["Home"], status_code=status.HTTP_200_OK)
 def root():
 	return HTMLResponse("<h1>Hello World</h1>")
 
+# MOVIES
 @app.get("/movies", tags=["Movie"], status_code=status.HTTP_200_OK, response_model=List[Movie])
 def get_movies(category: str = None) -> List[Movie]:
 	current_movies = get_data()
@@ -98,3 +104,11 @@ def delete_movie(movie_id) -> Movie:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 	return JSONResponse(content=deleted_movie)
+
+
+# AUTHENTICATION
+@app.post("/login", tags=["Auth"])
+def login(user: User):
+	if user.email == "admin@gmail.com" and user.password == "admin123":
+		new_token = create_token(dict(user))
+		return JSONResponse(status_code=status.HTTP_200_OK, content=new_token)
