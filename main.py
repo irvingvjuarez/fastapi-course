@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, status, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from utils import get_movie, get_data, modify_movies
 from models.movie import Movie
 from random import randint
@@ -7,11 +7,11 @@ from random import randint
 app = FastAPI()
 app.title = "My very first FastAPI application"
 
-@app.get("/", tags=["Home"])
+@app.get("/", tags=["Home"], status_code=status.HTTP_200_OK)
 def root():
 	return HTMLResponse("<h1>Hello World</h1>")
 
-@app.get("/movies", tags=["Movie"])
+@app.get("/movies", tags=["Movie"], status_code=status.HTTP_200_OK)
 def get_movies(category: str = None):
 	current_movies = get_data()
 
@@ -21,9 +21,9 @@ def get_movies(category: str = None):
 		)
 		current_movies = updated_movies
 
-	return current_movies
+	return JSONResponse(content=current_movies)
 
-@app.get("/movie/{movie_id}", tags=["Movie"])
+@app.get("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_200_OK)
 def get_movie_detail(movie_id: int):
 	matching_movies = list(
 		filter(lambda movie: movie["id"] == movie_id, get_data())
@@ -31,7 +31,7 @@ def get_movie_detail(movie_id: int):
 
 	matches = len(matching_movies)
 	if matches == 1:
-		return matching_movies[0]
+		return JSONResponse(content=matching_movies[0])
 	elif matches > 1:
 		raise HTTPException(
 			status_code=status.HTTP_409_CONFLICT,
@@ -57,18 +57,20 @@ async def add_movie(movie: Movie):
 
 	try:
 		modify_movies(current_movies)
-		return new_movie
+		return JSONResponse(content=new_movie)
 	except:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-@app.put("/movie/{movie_id}", tags=["Movie"])
+@app.put("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_204_NO_CONTENT)
 async def modify_movie(movie_id, new_properties: Movie):
 	try:
 		new_movie, movie_index = get_movie(id=movie_id)
 	except:
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
-	new_movie.update(new_properties)
+	for key, value in list(dict(new_properties).items()):
+		if value:
+			new_movie[key] = value
 
 	try:
 		new_data = get_data()
@@ -77,9 +79,9 @@ async def modify_movie(movie_id, new_properties: Movie):
 	except:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-	return new_movie
+	return JSONResponse(content=new_movie)
 
-@app.delete("/movie/{movie_id}", tags=["Movie"])
+@app.delete("/movie/{movie_id}", tags=["Movie"], status_code=status.HTTP_204_NO_CONTENT)
 def delete_movie(movie_id):
 	try:
 		_, movie_index = get_movie(id=movie_id)
@@ -94,4 +96,4 @@ def delete_movie(movie_id):
 	except:
 		raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-	return deleted_movie
+	return JSONResponse(content=deleted_movie)
