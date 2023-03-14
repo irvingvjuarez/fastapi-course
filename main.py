@@ -2,12 +2,17 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse, JSONResponse
 from utils import get_movie, get_data, modify_movies
 
+from config.database import Base, engine, Session
 from models.movie import Movie
-from models.user import User
 
-from jwt_manager import create_token, validate_token, JWTBearer
+from interfaces.movie import Movie
+from interfaces.user import User
+
+from jwt_manager import create_token, JWTBearer
 from typing import List
 from random import randint
+
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 app.title = "My very first FastAPI application"

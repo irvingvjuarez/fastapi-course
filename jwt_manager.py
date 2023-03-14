@@ -1,5 +1,5 @@
 from jwt import encode, decode
-from models.user import User
+from interfaces.user import User
 from fastapi import Request, HTTPException
 from fastapi.security import HTTPBearer
 
