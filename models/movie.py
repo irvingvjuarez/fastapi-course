@@ -1,10 +1,13 @@
-from pydantic import BaseModel, Field
-from typing import List, Optional
+from config.database import Base
+from sqlalchemy import Column, Integer, String, Float
 
-class Movie(BaseModel):
-	title: str = Field(max_length=50, default=None)
-	overview: str = Field(max_length=150, default=None)
-	year: str = Field(min_length=4, max_length=4, default=None)
-	rating: Optional[float]
-	category: Optional[List[str]]
-	id: Optional[int]
+class Movie(Base):
+	__tablename__ = "movies"
+
+	id = Column(Integer, primary_key=True)
+	title = Column(String)
+	overview = Column(String)
+	rating = Column(Float)
+	category = Column(String)
+	year = Column(Integer)
+
